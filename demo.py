@@ -1,22 +1,15 @@
 from MerkleTree import *
 from Crypto.Hash import SHA256
 
-print "Holaaaaaa!"
-
 def mihash(m):
     return SHA256.new(m).digest()
-print mihash("mensaje")
-print mihash("mensaje")
+# Funciones "dummy"
 keynum = 0
-
 def K():
     global keynum
     res = keynum
     keynum += 1
     return [str(res)+"x",str(res)+"y"]
-
-#def hasho(m):
-#    return "hasho! " + m + " "
 
 def S(m, x):
     return m + "|C:|" + x
@@ -28,9 +21,12 @@ def V(m, sig, y):
         num += y[i]
         i += 1
     return sig == m + "|C:|" + num + "x"
-
-Merky = MerkleTree(3,[K, S, V],mihash)
+# Generar un MerkleTree
+Merky = MerkleTree(4,[K, S, V],mihash)
+# Recuperar su raíz
 root = Merky.get_pk()
+
+# Funcion para imprimir (de forma muy simplifista) el árbol
 def printTree(roo):
     if roo.getIzq() != None: printTree(roo.getIzq())
     print "(" + str(roo.getAltura()) + " - " + roo.getElement() + ") "
@@ -39,11 +35,14 @@ def printTree(roo):
 print Merky.sk
 printTree(root)
 print "\n\n"
+# Obtener verificador (el firmador es parte del árbol, el verificador es un objeto aparte)
 very = Merky.get_verifier()
 mens = "mensaje"
-for i in range(8):
-    firma = Merky.sign(mens)
+#Imprimir firma e imprimir si se verifica
+for i in range(16):
+    firma = Merky.sign(mens + str(i))
     print firma
-    print very.verify("mensaje", firma)
-print "AAAA"
+    print very.verify("mensaje" + str(i), firma)
+
+print "\nDone"
 

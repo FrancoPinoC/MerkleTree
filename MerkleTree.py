@@ -1,4 +1,3 @@
-import math
 from Nodo import *
 from MerkleVerifier import *
 class MerkleTree:
@@ -61,21 +60,4 @@ class MerkleTree:
 
     def get_verifier(self):
         return self.Verifier;
-
-###
-#    def verify(self, M , S_m, g, pk):
-#        #stage 1
-#        d =  g(M)
-#        Y = S_m[0]
-#        s_ots = S_m[2]
-#        Ver_ots = self.otsScheme[2]
-#        if(not Ver_ots(s_ots, Y)):
-#            return False
-#       #stage 2
-#        auth_path = S_m[1];
-#        h = g(Y)
-#        for i in range(len(auth_path)):
-#            h = g(auth_path[len(auth_path)-1-i]+ h)
-#        return h == pk
-
 
