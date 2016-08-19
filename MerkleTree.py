@@ -1,30 +1,81 @@
 import math
-import Nodo
-
+from Nodo import *
+from MerkleVerifier import *
 class MerkleTree:
-    # h = altura del arbol. Numero de hojas = 2^h -1
-    # otsScheme = lista de algoritmos del one-time-signature scheme seleccionado
-    #   La lista esta en la forma [K,S,V]
-    # g = hashing usado
+    # h = tree's height. Leaves = 2^h
+    # otsScheme = a list of conatining the selected one-time-signature scheme's algorithms
+    #   It's in this format: [K,S,V]
+    # g = hashing function
     def __init__(self, h, otsScheme , g):
         self.pk = ''
         self.sk = []
-        leaves = []
-        #Merkle Generation:
-        for i in range(math.pow(2,h)-1):
+        self.otsScheme = otsScheme
+        self.hash = g
+        self.current_key_index = 0
+        self.height = h
+        #Merkle Tree Generation:
+        stack = []
+        for i in range(int(math.pow(2,h))):
             currentPair = otsScheme[0]()
-            node1 = Nodo(g(currentPair[0]))
+            node1 = Nodo(g(currentPair[1]))
             self.sk.append(currentPair)
-            stack = []
-            while stack and (node1.getAltura() == stack[len(stack) - 1]):
+            while stack and (node1.getAltura() == stack[len(stack) - 1].getAltura()):
                 node2 = stack.pop()
-                valNodo = g(node1.getElement()+node2.getElement())
-                node1 = Nodo(valNodo, node2, node1)
+                val_node = g(node2.getElement()+node1.getElement())
+                node1 = Nodo(val_node, node2, node1)
             stack.append(node1)
         self.pk = stack.pop()
 
-    def getPk(self):
+        #Initialiaze verifier
+        self.Verifier = MerkleVerifier()
+        self.Verifier.pk = self.pk
+        self.Verifier.hash =  g
+        self.Verifier.ver_ots = otsScheme[2]
+
+    def get_pk(self):
         return self.pk
 
+    def sign(self, m):
+        i = self.current_key_index
+        if i >= math.pow(2,self.height):
+            raise ValueError('You have ran out of key pairs')
+        d = self.hash(m)
+        s_ots = self.otsScheme[1](d, self.sk[i][0])
+        auth_path = self.tracking_path(self.height, self.pk, i)
+        # [Verification Key_i, authentification path for said key, ots's signature, current key pair index]
+        S_m = [self.sk[i][1], auth_path, s_ots, i]
+        self.current_key_index += 1
+        return S_m
+
+    def tracking_path(self, h, root, index):
+        r = []
+        if h == 0:
+            return r
+        if(index < math.pow(2,h-1)):
+            r.append(root.getDer().getElement())
+            r = r + self.tracking_path((h - 1), root.getIzq(), index)
+        else:
+            r.append(root.getIzq().getElement())
+            r = r + self.tracking_path((h - 1), root.getDer(), index - math.pow(2, h - 1))
+        return r
+
+    def get_verifier(self):
+        return self.Verifier;
+
+###
+#    def verify(self, M , S_m, g, pk):
+#        #stage 1
+#        d =  g(M)
+#        Y = S_m[0]
+#        s_ots = S_m[2]
+#        Ver_ots = self.otsScheme[2]
+#        if(not Ver_ots(s_ots, Y)):
+#            return False
+#       #stage 2
+#        auth_path = S_m[1];
+#        h = g(Y)
+#        for i in range(len(auth_path)):
+#            h = g(auth_path[len(auth_path)-1-i]+ h)
+#        return h == pk
 
 
