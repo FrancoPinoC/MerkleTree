@@ -1,4 +1,6 @@
 import math
+
+
 class MerkleVerifier:
     # Instance variables are supposed to be directly initialized by the MerkleTree class
     def __init__(self):

@@ -5,6 +5,7 @@ class Nodo:
         self.izq = izq
         self.der = der
         self.altura = None
+
     def getElement(self):
         return self.element
     def getIzq(self):
@@ -13,15 +14,18 @@ class Nodo:
         return self.der
 
     def getAltura(self):
-        if self.izq == None and self.der == None: self.altura = 0
+        if self.izq == None and self.der == None:
+            self.altura = 0
         elif self.altura == None:
             self.altura = 1 + max(self.izq.getAltura(), self.der.getAltura())
         return self.altura
 
     def setIzq(self, i):
         self.izq = i
+
     def setDer(self, d):
         self.der = d
+
     def setElement(self, e):
-        self.element= e
+        self.element = e
 
